@@ -1,1 +1,1 @@
-# discreet-distributions
+# Discreet Distributions
