@@ -11,7 +11,7 @@ public class ListGraph<T> implements GraphI<T>{
     private HashMap<T, Vertex<T>> graph;
     private int numVertices;
     private boolean directed;
-    private String printedGraph;
+    private ArrayList<ArrayList<T>> groupedGraph;
     private int groups;
 
     //-------------------------------------------------- Constructor
@@ -19,8 +19,8 @@ public class ListGraph<T> implements GraphI<T>{
     public ListGraph(boolean directed) {
         this.directed = directed;
         graph = new HashMap<>();
+        groupedGraph = new ArrayList<>();
         numVertices = 0;
-        printedGraph = "";
         groups = 0;
     }
 
@@ -50,20 +50,20 @@ public class ListGraph<T> implements GraphI<T>{
         this.directed = directed;
     }
 
-    public String getPrintedGraph() {
-        return printedGraph;
-    }
-
-    public void setPrintedGraph(String printedGraph) {
-        this.printedGraph = printedGraph;
-    }
-
     public int getGroups() {
         return groups;
     }
 
     public void setGroups(int groups) {
         this.groups = groups;
+    }
+
+    public ArrayList<ArrayList<T>> getGroupedGraph() {
+        return groupedGraph;
+    }
+
+    public void setGroupedGraph(ArrayList<ArrayList<T>> groupedGraph) {
+        this.groupedGraph = groupedGraph;
     }
 
     //-------------------------------------------------- Methods
@@ -169,8 +169,8 @@ public class ListGraph<T> implements GraphI<T>{
 
     public void clear() {
         graph = new HashMap<>();
+        groupedGraph = new ArrayList<>();
         numVertices = 0;
-        printedGraph = "";
         groups = 0;
     }
 
@@ -181,12 +181,12 @@ public class ListGraph<T> implements GraphI<T>{
     }
 
     /**
-     * Returns if the graph is strongly connected or not
-     * @return
+     * Executes DFS
+     * @return true if the graph is strongly connected, and false if otherwise
      */
     public boolean dfs() {
         resetVisitedNodes();
-        printedGraph = "";
+        groupedGraph = new ArrayList<>();
         groups = 0;
 
         boolean connected = false;
@@ -195,8 +195,8 @@ public class ListGraph<T> implements GraphI<T>{
         for (Vertex<T> vertex : graph.values()) {
             if (!vertex.isVisited()) {
                 groups++;
+                groupedGraph.add(new ArrayList<>());
                 dfsRecursive(vertex);
-                printedGraph += "\n";
             }
         }
 
@@ -210,8 +210,7 @@ public class ListGraph<T> implements GraphI<T>{
     private void dfsRecursive(Vertex<T> vertex) {
         // Set as visited
         vertex.setVisited(true);
-
-        printedGraph += vertex.getValue() + " ";
+        groupedGraph.get(groups).add(vertex.getValue());
 
         // For every adjacent vertex
         for (Edge<T> adjEdge : vertex.getEdges()) {
@@ -224,6 +223,12 @@ public class ListGraph<T> implements GraphI<T>{
         }
     }
 
+    /**
+     * Determines the shortest path between a value and another within the graph
+     * @param startValue the value of the starting vertex
+     * @param destinationValue the value of the destination vertex
+     * @return a String giving the shortest path information
+     */
     public String dijkstra(T startValue, T destinationValue) {
         Pair<HashMap<T, T>, HashMap<T, Double>> dijkstraResults = dijkstraImplementation(startValue);
         String result = "";

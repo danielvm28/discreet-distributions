@@ -1,16 +1,20 @@
 package main;
 
+import model.DistributionSystem;
 import structures.ListGraph;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
     public static ListGraph<String> graph = new ListGraph<>(false);
     public static Scanner s = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         int selection = 0;
         boolean exit = false;
+
+        DistributionSystem ds = new DistributionSystem();
 
         graph.addEdge("1", "2", 2);
         graph.addEdge("2", "5", 5);
