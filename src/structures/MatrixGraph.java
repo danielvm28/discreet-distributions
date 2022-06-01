@@ -8,23 +8,28 @@ import java.util.List;
 
 public class MatrixGraph<T> implements GraphI<T>{
     //-------------------------------------------------- Attributes
-    private final HashMap<T, Integer> pos;
-    private final ArrayList<ArrayList<Double>> graph;
-    private HashMap<Integer, T> posIndex;
-    private final int numVertex;
+    private final HashMap<T, Integer> pos; // Position in the matrix for a given value
+    private HashMap<Integer, T> posIndex; // Value according to the position in the matrix
+    private final ArrayList<ArrayList<Double>> graph; // Adjacency matrix representation of graph
+    private int numVertex;
     private int keyPos = 0;
-    private ArrayList<Integer> posRemove;
-    private ArrayList<ArrayList<Double>> mapFloyd;
-    private ArrayList<ArrayList<Integer>> mapAntFloyd;
+    private boolean directed;
+    private ArrayList<Integer> posRemove; // Removed positions
+    private ArrayList<ArrayList<Double>> mapFloyd; // Distances matrix of Floyd-Warshall
+    private ArrayList<ArrayList<Integer>> mapAntFloyd; // Ancestors matrix of Floyd-Warshall
+    private ArrayList<ArrayList<T>> groupedGraph; // Connected vertices per group after DFS
+    private int groups; // Groups found after DFS
     //-------------------------------------------------- Constructor
-    public MatrixGraph(int numVertex) {
+    public MatrixGraph(int numVertex, boolean directed) {
         pos = new HashMap<>();
         posRemove = new ArrayList<>();
         mapFloyd= new ArrayList<>();
         mapAntFloyd= new ArrayList<>();
-        this.graph = new ArrayList<>();
+        graph = new ArrayList<>();
         posIndex = new HashMap<>();
+        groupedGraph = new ArrayList<>();
         this.numVertex = numVertex;
+        this.directed = directed;
         fillMatrix();
     }
     //-------------------------------------------------- Getters and Setters
@@ -34,6 +39,14 @@ public class MatrixGraph<T> implements GraphI<T>{
 
     public ArrayList<ArrayList<Integer>> getMapAntFloyd() {
         return mapAntFloyd;
+    }
+
+    public ArrayList<ArrayList<T>> getGroupedGraph() {
+        return groupedGraph;
+    }
+
+    public void setGroupedGraph(ArrayList<ArrayList<T>> groupedGraph) {
+        this.groupedGraph = groupedGraph;
     }
 
     //-------------------------------------------------- Methods
@@ -47,7 +60,8 @@ public class MatrixGraph<T> implements GraphI<T>{
             for (int i = 0; i < graph.size(); i++) {
                 graph.get(graph.size()-1).add(Integer.MAX_VALUE+0.0);
             }
-            floydWarshall();
+
+            numVertex++;
             keyVertex(value);
 
             return true;
@@ -57,19 +71,39 @@ public class MatrixGraph<T> implements GraphI<T>{
     }
 
     @Override
-    public void addEdge(T value1, T value2) {
+    public boolean addEdge(T value1, T value2) {
         int pos1 = pos.get(value1);
         int pos2 = pos.get(value2);
+
+        if (graph.get(pos1).get(pos2) != Integer.MAX_VALUE + 0.0) {
+            return false;
+        }
+
         graph.get(pos1).set(pos2, 1.0);
-        floydWarshall();
+
+        if (!directed) {
+            graph.get(pos2).set(pos1, 1.0);
+        }
+
+        return true;
     }
 
     @Override
-    public void addEdge(T value1, T value2, double weight) {
+    public boolean addEdge(T value1, T value2, double weight) {
         int pos1 = pos.get(value1);
         int pos2 = pos.get(value2);
+
+        if (graph.get(pos1).get(pos2) != Integer.MAX_VALUE + 0.0) {
+            return false;
+        }
+
         graph.get(pos1).set(pos2, weight);
-        floydWarshall();
+
+        if (!directed) {
+            graph.get(pos2).set(pos1, weight);
+        }
+
+        return true;
     }
 
     @Override
@@ -88,7 +122,7 @@ public class MatrixGraph<T> implements GraphI<T>{
             graph.get(posi).set(i, Integer.MAX_VALUE+0.0);
         }
 
-        floydWarshall();
+        numVertex--;
 
         return true;
     }
@@ -100,7 +134,10 @@ public class MatrixGraph<T> implements GraphI<T>{
         boolean hadConnection = graph.get(pos1).get(pos2) != Integer.MAX_VALUE+0.0;
 
         graph.get(pos1).set(pos2, Integer.MAX_VALUE+0.0);
-        floydWarshall();
+
+        if (!directed) {
+            graph.get(pos2).set(pos1, Integer.MAX_VALUE+0.0);
+        }
 
         return hadConnection;
     }
@@ -124,17 +161,15 @@ public class MatrixGraph<T> implements GraphI<T>{
         }
     }
 
-    public void keyVertex(T value){
-        if (!pos.containsKey(value)){
-            if (posRemove.size()!=0){
-                pos.put(value, posRemove.get(0));
-                posIndex.put(posRemove.get(0), value);
-                posRemove.remove(0);
-            } else {
-                posIndex.put(keyPos, value);
-                pos.put(value, keyPos);
-                keyPos++;
-            }
+    private void keyVertex(T value){
+        if (posRemove.size()!=0){
+            pos.put(value, posRemove.get(0));
+            posIndex.put(posRemove.get(0), value);
+            posRemove.remove(0);
+        } else {
+            posIndex.put(keyPos, value);
+            pos.put(value, keyPos);
+            keyPos++;
         }
     }
 
@@ -154,6 +189,16 @@ public class MatrixGraph<T> implements GraphI<T>{
         int posStart = pos.get(startValue);
         int posDestination = pos.get(destinationValue);
 
+        // Execute Floyd-Warshall
+        floydWarshall();
+
+        if (mapFloyd.get(posStart).get(posDestination) == Integer.MAX_VALUE + 0.0) {
+            output += "It is not possible to reach " + destinationValue + " from " + startValue;
+            return output;
+        }
+
+        output += "The distance to " + destinationValue + " is " + mapFloyd.get(posStart).get(posDestination) + "\nThe path to " + destinationValue + " is: ";
+
         while (!flag) {
             if (mapAntFloyd.get(posStart).get(posDestination) != posStart) {
                 output = posIndex.get(mapAntFloyd.get(posStart).get(posDestination)) + " " + output;
@@ -168,7 +213,7 @@ public class MatrixGraph<T> implements GraphI<T>{
         return output;
     }
 
-    public void floydWarshall(){
+    private void floydWarshall(){
         mapFloyd = new ArrayList<>();
         mapFloyd.addAll(graph);
         matrixAnt();
@@ -180,6 +225,54 @@ public class MatrixGraph<T> implements GraphI<T>{
                         mapAntFloyd.get(i).set(j, mapAntFloyd.get(k).get(j));
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Executes DFS
+     * @return true if the graph is strongly connected, and false if otherwise
+     */
+    public boolean dfs() {
+        ArrayList<Boolean> visited = new ArrayList<>();
+
+        // Initialize all nodes to false
+        for (int i = 0; i < numVertex; i++) {
+            visited.add(false);
+        }
+
+        groupedGraph = new ArrayList<>();
+        groups = 0;
+
+        boolean connected = false;
+
+        // For each vertex
+        for (int i = 0; i < graph.size(); i++) {
+            if (!visited.get(i)) {
+                groups++;
+                groupedGraph.add(new ArrayList<>());
+                dfsRecursive(i, visited);
+            }
+        }
+
+        if (groups == 1) {
+            connected = true;
+        }
+
+        return connected;
+    }
+
+    private void dfsRecursive(int vertexIndex, ArrayList<Boolean> visited) {
+        // Set as visited
+        visited.set(vertexIndex, true);
+        groupedGraph.get(groups).add(posIndex.get(vertexIndex));
+
+        // For every adjacent vertex
+        for (int i = 0; i < graph.get(vertexIndex).size(); i++) {
+
+            // If not visited, do dfs
+            if (graph.get(vertexIndex).get(i) != Integer.MAX_VALUE + 0.0 && !visited.get(i)) {
+                dfsRecursive(i, visited);
             }
         }
     }

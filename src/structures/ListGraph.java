@@ -11,8 +11,8 @@ public class ListGraph<T> implements GraphI<T>{
     private HashMap<T, Vertex<T>> graph;
     private int numVertices;
     private boolean directed;
-    private ArrayList<ArrayList<T>> groupedGraph;
-    private int groups;
+    private ArrayList<ArrayList<T>> groupedGraph; // Connected vertices per group after DFS
+    private int groups; // Groups found after DFS
 
     //-------------------------------------------------- Constructor
 
@@ -69,7 +69,7 @@ public class ListGraph<T> implements GraphI<T>{
     //-------------------------------------------------- Methods
 
     @Override
-    public void addEdge(T value1, T value2, double weight) {
+    public boolean addEdge(T value1, T value2, double weight) {
         Vertex<T> vertex1;
         Vertex<T> vertex2;
 
@@ -84,11 +84,11 @@ public class ListGraph<T> implements GraphI<T>{
         vertex2 = graph.get(value2);
 
         numVertices++;
-        addEdge(vertex1, vertex2, weight);
+        return addEdge(vertex1, vertex2, weight);
     }
 
     @Override
-    public void addEdge(T value1, T value2) {
+    public boolean addEdge(T value1, T value2) {
         Vertex<T> vertex1;
         Vertex<T> vertex2;
 
@@ -103,16 +103,24 @@ public class ListGraph<T> implements GraphI<T>{
         vertex2 = graph.get(value2);
 
         numVertices++;
-        addEdge(vertex1, vertex2, 1);
+        return addEdge(vertex1, vertex2, 1);
     }
 
 
-    private void addEdge(Vertex<T> vertex, Vertex<T> destiny, double weight) {
+    private boolean addEdge(Vertex<T> vertex, Vertex<T> destiny, double weight) {
+        for (int i = 0; i < vertex.getEdges().size(); i++) {
+            if (vertex.getEdges().get(i).getNext().equals(destiny)) {
+                return false;
+            }
+        }
+
         vertex.addEdge(weight, destiny);
 
         if (!directed) {
             destiny.addEdge(weight, vertex);
         }
+
+        return true;
     }
 
     @Override
@@ -130,6 +138,18 @@ public class ListGraph<T> implements GraphI<T>{
     public boolean removeVertex(T value) {
         if (graph.containsKey(value)) {
             graph.remove(value);
+
+            // Remove any existent connection
+            for (Vertex<T> vertex :
+                    graph.values()) {
+                for (int i = 0; i < vertex.getEdges().size(); i++) {
+                    if (vertex.getEdges().get(i).getNext().getValue().equals(value)) {
+                        vertex.getEdges().remove(i);
+                        i--;
+                    }
+                }
+            }
+
             return true;
         }
 
@@ -142,7 +162,7 @@ public class ListGraph<T> implements GraphI<T>{
 
         if (!directed) {
             Vertex<T> vertex2 = graph.get(value2);
-            vertex1.getEdges().removeIf(edge -> edge.getNext().equals(graph.get(value2)));
+            vertex2.getEdges().removeIf(edge -> edge.getNext().equals(graph.get(value1)));
         }
 
         return vertex1.getEdges().removeIf(edge -> edge.getNext().equals(graph.get(value2)));

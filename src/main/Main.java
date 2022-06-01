@@ -1,6 +1,7 @@
 package main;
 
 import model.DistributionSystem;
+import model.GraphType;
 import structures.ListGraph;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class Main {
         int selection = 0;
         boolean exit = false;
 
-        DistributionSystem ds = new DistributionSystem();
+        DistributionSystem ds = new DistributionSystem(GraphType.LISTS);
 
         graph.addEdge("1", "2", 2);
         graph.addEdge("2", "5", 5);

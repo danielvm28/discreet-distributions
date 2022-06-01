@@ -24,4 +24,8 @@ public class Office {
     public void setProducts(int products) {
         this.products = products;
     }
+
+    public String toString() {
+        return city;
+    }
 }
