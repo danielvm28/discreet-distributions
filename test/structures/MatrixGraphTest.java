@@ -27,7 +27,7 @@ class MatrixGraphTest {
     void addVertex() {
         setupStage1();
         matrixGraph.addVertex(4);
-        assertEquals(matrixGraph.getGraph().size(), 4);
+        assertEquals(matrixGraph.getNumVertex(), 4);
     }
 
     @Test

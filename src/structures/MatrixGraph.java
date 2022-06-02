@@ -31,6 +31,9 @@ public class MatrixGraph<T> implements GraphI<T>{
         this.directed = directed;
     }
     //-------------------------------------------------- Getters and Setters
+    public int getNumVertex() {
+        return numVertex;
+    }
 
     public ArrayList<ArrayList<Double>> getGraph() {
         return graph;
