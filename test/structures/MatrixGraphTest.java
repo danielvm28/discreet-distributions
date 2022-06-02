@@ -3,7 +3,6 @@ package structures;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.testng.AssertJUnit.assertEquals;
 
 class MatrixGraphTest {
     MatrixGraph<Integer> matrixGraph;
