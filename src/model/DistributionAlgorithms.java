@@ -31,12 +31,14 @@ public class DistributionAlgorithms {
         else output += "The offices are not all connected\n\n";
 
         for (int i = 0; i < groups; i++) {
+            totalProducts = 0;
+
             for (Office office :
                     groupedGraph.get(i)) {
                 totalProducts += office.getProducts();
             }
 
-            output += "Group " + (i+1) + " Office of reference: " + groupedGraph.get(i).get(0).getCity()
+            output += "Group " + (i+1) + " | Office of reference: " + groupedGraph.get(i).get(0).getCity()
                     +  " | No. Offices: " + groupedGraph.get(i).size() + " | Product Mean: " + (double) (totalProducts/groupedGraph.get(i).size()) + "\n";
         }
 

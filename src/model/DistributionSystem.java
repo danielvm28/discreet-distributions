@@ -8,14 +8,17 @@ import java.util.ArrayList;
 
 public class DistributionSystem {
     private GraphI<Office> graph;
-    private ArrayList<Office> offices;
+    private ArrayList<Office> totalOffices;
+    GraphType graphType;
 
     /**
      * Constructs the graph according to the selected type
      * @param graphType the type of graph selected
      */
     public DistributionSystem(GraphType graphType) {
-        graph = (graphType == GraphType.LISTS) ? new ListGraph<>(false) : new MatrixGraph<>(50, false);
+        this.graphType = graphType;
+        graph = (graphType == GraphType.LISTS) ? new ListGraph<>(false) : new MatrixGraph<>(false);
+        totalOffices = new ArrayList<>();
         readData();
     }
 
@@ -34,6 +37,7 @@ public class DistributionSystem {
                 offices.add(office);
 
                 graph.addVertex(office);
+                totalOffices.add(office);
             }
 
             br = new BufferedReader(new InputStreamReader(new FileInputStream("data/cities_database.csv")));
@@ -70,6 +74,20 @@ public class DistributionSystem {
         return pos;
     }
 
+    public Office searchOffice(String city) {
+        Office foundOffice = null;
+
+        for (Office office :
+                totalOffices) {
+            if (office.getCity().equals(city)) {
+                foundOffice = office;
+                break;
+            }
+        }
+
+        return foundOffice;
+    }
+
     /**
      * Adds a connection between two offices
      * @param office1 the first office
@@ -98,21 +116,41 @@ public class DistributionSystem {
         return existed;
     }
 
+    /**
+     * Removes a connection between two offices
+     * @param office1 the first office
+     * @param office2 the second office
+     * @return true if the connection existed, and false if it did not
+     */
     public boolean removeConnection(Office office1, Office office2) {
-        return false;
+        return graph.removeEdge(office1, office2);
     }
 
     /**
      * Adds an office to the graph
-     * @return
+     * @param office1 the office to add
+     * @return true if the office did not exist, and false if it did
      */
     public boolean addOffice(Office office1) {
-        return false;
+        totalOffices.add(office1);
+        return graph.addVertex(office1);
     }
 
+    /**
+     * Removes an office from the graph
+     * @param office1 the office to remove
+     * @return true if the office existed, and false if it did not
+     */
     public boolean removeOffice(Office office1) {
-        return false;
+        totalOffices.remove(office1);
+        return graph.removeVertex(office1);
     }
 
+    public String determineOfficeGroups() {
+        return DistributionAlgorithms.determineMeanProductsPerGroup(graph);
+    }
 
+    public String determineShortestPath(Office start, Office destination) {
+        return DistributionAlgorithms.determineShortestPath(graph, start, destination);
+    }
 }

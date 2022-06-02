@@ -230,7 +230,7 @@ public class ListGraph<T> implements GraphI<T>{
     private void dfsRecursive(Vertex<T> vertex) {
         // Set as visited
         vertex.setVisited(true);
-        groupedGraph.get(groups).add(vertex.getValue());
+        groupedGraph.get(groups-1).add(vertex.getValue());
 
         // For every adjacent vertex
         for (Edge<T> adjEdge : vertex.getEdges()) {
@@ -257,11 +257,11 @@ public class ListGraph<T> implements GraphI<T>{
         HashMap<T, Double> distances = dijkstraResults.getValue();
 
         if (distances.get(destinationValue) == Double.MAX_VALUE) {
-            result += "It is not possible to reach " + destinationValue + " from " + startValue;
+            result += "\nIt is not possible to reach " + destinationValue + " from " + startValue;
             return result;
         }
 
-        result += "The distance to " + destinationValue + " is " + distances.get(destinationValue) + "\nThe path to " + destinationValue + " is: ";
+        result += "\nThe distance to " + destinationValue + " is " + distances.get(destinationValue) + "\nThe path to " + destinationValue + " is: ";
 
         boolean flag = false;
         ArrayList<T> path = new ArrayList<>();
@@ -279,7 +279,11 @@ public class ListGraph<T> implements GraphI<T>{
         }
 
         for (int i = path.size() - 1; i >= 0; i--) {
-            result += path.get(i) + " ";
+            if (i == 0) {
+                result += path.get(i);
+            } else {
+                result += path.get(i) + " --- ";
+            }
         }
 
         return result;

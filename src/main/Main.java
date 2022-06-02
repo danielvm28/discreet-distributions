@@ -2,94 +2,200 @@ package main;
 
 import model.DistributionSystem;
 import model.GraphType;
-import structures.ListGraph;
-
-import java.io.IOException;
+import model.Office;
 import java.util.Scanner;
 
 public class Main {
-    public static ListGraph<String> graph = new ListGraph<>(false);
+    public static DistributionSystem ds;
     public static Scanner s = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException {
+    public static boolean addOffice() {
+        String city = "";
+        int products = 0;
+
+        System.out.print("\nIntroduce the city of the office: ");
+        city = s.nextLine();
+        System.out.print("Introduce the products of the city: ");
+        products = s.nextInt();
+        s.nextLine();
+
+        Office existentOffice = ds.searchOffice(city);
+
+        if (existentOffice == null) {
+            Office newOffice = new Office(city, products);
+            ds.addOffice(newOffice);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static Office determineOffice() {
+        Office foundOffice = null;
+        String city = "";
+
+        System.out.print("Introduce the city of the office: ");
+        city = s.nextLine();
+
+        foundOffice = ds.searchOffice(city);
+
+        return foundOffice;
+    }
+
+    public static void main(String[] args) {
         int selection = 0;
         boolean exit = false;
 
-        DistributionSystem ds = new DistributionSystem(GraphType.LISTS);
+        do {
+            System.out.println("\nChoose the graph representation");
+            System.out.println("1) Adjacency List");
+            System.out.println("2) Adjacency Matrix\n");
+            selection = s.nextInt();
+            s.nextLine();
+        } while (selection != 1 && selection != 2);
 
-        graph.addEdge("1", "2", 2);
-        graph.addEdge("2", "5", 5);
-        graph.addEdge("2", "3", 4);
-        graph.addEdge("1", "4", 1);
-        graph.addEdge("4", "3", 3);
-        graph.addEdge("3", "5", 1);
+        if (selection == 1) {
+            ds = new DistributionSystem(GraphType.LISTS);
+        } else {
+            ds = new DistributionSystem(GraphType.MATRIX);
+        }
 
         while (!exit) {
+            Office office1;
+            Office office2;
+
             System.out.println("\n----------------------------------------------------\n");
-            System.out.println("This graph works with strings and is undirected by default");
-            System.out.println("1) Add an edge between vertices");
-            System.out.println("2) Reset graph");
-            System.out.println("3) Determine Minimum Spanning Tree");
-            System.out.println("4) Determine Shortest Path");
+            System.out.println("Welcome to the Discreet Softwares Inc. distribution system");
+            System.out.println("1) Add a new office");
+            System.out.println("2) Remove an office");
+            System.out.println("3) Add a new connection between offices");
+            System.out.println("4) Update a connection between offices");
+            System.out.println("5) Remove a connection between offices");
+            System.out.println("6) Determine the office groups and product average");
+            System.out.println("7) Determine the shortest path between two offices");
             System.out.println("0) Exit");
             System.out.println("\n----------------------------------------------------\n");
             selection = s.nextInt();
+            s.nextLine();
 
             switch (selection) {
                 case 0:
                     exit = true;
                     break;
                 case 1:
-                    s.nextLine();
-                    String val1 = "";
-                    String val2 = "";
-                    double weight = 0.0;
+                    if (addOffice()) {
+                        System.out.println("\nOffice added successfully");
+                    } else {
+                        System.out.println("\nError, the office already exists");
+                    }
 
-                    System.out.print("\nIntroduce the first value: ");
-                    val1 = s.nextLine();
-                    System.out.print("Introduce the second value: ");
-                    val2 = s.nextLine();
-                    System.out.print("Introduce the weight of the edge: ");
-                    weight = s.nextDouble();
-                    s.nextLine();
-
-                    graph.addEdge(val1, val2, weight);
-
-                    break;
-                case 2:
-                    graph.clear();
-                    System.out.println("\nGraph cleared");
                     System.out.println("\nPress enter to continue...");
                     s.nextLine();
+                    break;
+                case 2:
+                    Office office = determineOffice();
+
+                    if (ds.removeOffice(office)) {
+                        System.out.println("\nOffice removed successfully");
+                    } else {
+                        System.out.println("\nError, the office did not exist");
+                    }
+
+                    System.out.println("\nPress enter to continue...");
                     s.nextLine();
                     break;
                 case 3:
-                    if (graph.getNumVertices() != 0) {
-                        System.out.println("\nEach edge of the tree will be in a different line\n");
-                        System.out.println(graph.prim());
-                    } else {
-                        System.out.println("The graph is empty\n");
-                    }
+                    System.out.println("Office 1");
+                    office1 = determineOffice();
+                    System.out.println("Office 2");
+                    office2 = determineOffice();
 
-                    System.out.println("Press enter to continue...");
-                    s.nextLine();
-                    s.nextLine();
-                    break;
-                case 4:
-                    if (graph.getNumVertices() != 0) {
+                    if (office1 == null || office2 == null) {
+                        System.out.println("\nError, one of the offices does not exist");
+                    } else {
+                        double distance = 0.0;
+
+                        System.out.print("Indicate the distance between the offices: ");
+                        distance = s.nextDouble();
                         s.nextLine();
-                        System.out.print("\nIntroduce the start value: ");
-                        String startVal = s.nextLine();
-                        System.out.print("Introduce the destination value: ");
-                        String destinationVal = s.nextLine();
 
-                        System.out.println("\n" + graph.dijkstra(startVal, destinationVal));
-                    } else {
-                        System.out.println("The graph is empty\n");
+                        if (ds.addConnection(office1, office2, distance)) {
+                            System.out.println("\nConnection added successfully");
+                        } else {
+                            System.out.println("\nError, the connection already exists");
+                        }
                     }
 
                     System.out.println("\nPress enter to continue...");
                     s.nextLine();
+                    break;
+                case 4:
+                    System.out.println("Office 1");
+                    office1 = determineOffice();
+                    System.out.println("Office 2");
+                    office2 = determineOffice();
+
+                    if (office1 == null || office2 == null) {
+                        System.out.println("\nError, one of the offices does not exist");
+                    } else {
+                        double distance = 0.0;
+
+                        System.out.print("Indicate the new distance between the offices: ");
+                        distance = s.nextDouble();
+                        s.nextLine();
+
+                        if (ds.updateConnection(office1, office2, distance)) {
+                            System.out.println("\nConnection updated successfully");
+                        } else {
+                            System.out.println("\nError, the connection did not exist");
+                        }
+                    }
+
+                    System.out.println("\nPress enter to continue...");
+                    s.nextLine();
+                    break;
+                case 5:
+                    System.out.println("Office 1");
+                    office1 = determineOffice();
+                    System.out.println("Office 2");
+                    office2 = determineOffice();
+
+                    if (office1 == null || office2 == null) {
+                        System.out.println("\nError, one of the offices does not exist");
+                    } else {
+
+                        if (ds.removeConnection(office1, office2)) {
+                            System.out.println("\nConnection removed successfully");
+                        } else {
+                            System.out.println("\nError, the connection did not exist");
+                        }
+                    }
+
+                    System.out.println("\nPress enter to continue...");
+                    s.nextLine();
+                    break;
+                case 6:
+                    System.out.println(ds.determineOfficeGroups());
+
+                    System.out.println("Press enter to continue...");
+                    s.nextLine();
+                    break;
+                case 7:
+                    System.out.println("Office 1");
+                    office1 = determineOffice();
+                    System.out.println("Office 2");
+                    office2 = determineOffice();
+
+                    if (office1 == null || office2 == null) {
+                        System.out.println("\nError, one of the offices does not exist");
+                    } else {
+                        System.out.println(ds.determineShortestPath(office1, office2));
+                    }
+
+                    System.out.println("\nPress enter to continue...");
+                    s.nextLine();
+
                     break;
                 default:
                     System.out.println("Invalid selection");
