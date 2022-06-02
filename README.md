@@ -5,7 +5,7 @@ the shortest paths and the products average for a given set of connected offices
 
 ---
 
-##Authors
+## Authors
 
 * Daniel Valencia
 * Juan Camilo Bernal
