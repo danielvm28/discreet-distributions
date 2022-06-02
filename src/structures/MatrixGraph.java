@@ -31,6 +31,11 @@ public class MatrixGraph<T> implements GraphI<T>{
         this.directed = directed;
     }
     //-------------------------------------------------- Getters and Setters
+
+    public ArrayList<ArrayList<Double>> getGraph() {
+        return graph;
+    }
+
     public ArrayList<ArrayList<Double>> getMapFloyd() {
         return mapFloyd;
     }
