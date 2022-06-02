@@ -83,7 +83,6 @@ public class ListGraph<T> implements GraphI<T>{
         }
         vertex2 = graph.get(value2);
 
-        numVertices++;
         return addEdge(vertex1, vertex2, weight);
     }
 
@@ -102,7 +101,6 @@ public class ListGraph<T> implements GraphI<T>{
         }
         vertex2 = graph.get(value2);
 
-        numVertices++;
         return addEdge(vertex1, vertex2, 1);
     }
 
@@ -128,6 +126,7 @@ public class ListGraph<T> implements GraphI<T>{
 
         if (!graph.containsKey(value)) {
             graph.put(value, new Vertex<>(value));
+            numVertices++;
             return true;
         }
 
